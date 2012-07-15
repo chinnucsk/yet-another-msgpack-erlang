@@ -197,13 +197,13 @@ pack_(Term) ->
 
 -spec pack_uint_(non_neg_integer()) -> binary().
 %% positive fixnum
-pack_uint_(N) when N < 128 ->
+pack_uint_(N) when N =< 16#7F ->
     {ok, <<2#0:1, N:7>>};
 %% uint 8
-pack_uint_(N) when N < 256 ->
+pack_uint_(N) when N =< 16#FF ->
     {ok, <<16#CC:8, N:8>>};
 %% uint 16
-pack_uint_(N) when N < 65536 ->
+pack_uint_(N) when N =< 16#FFFF ->
     {ok, <<16#CD:8, N:16/big-unsigned-integer-unit:1>>};
 %% uint 32
 pack_uint_(N) when N < 16#FFFFFFFF ->
@@ -244,8 +244,7 @@ pack_raw(Bin) ->
     case byte_size(Bin) of
 	Len when Len < 6 ->
             {ok, <<2#101:3, Len:5, Bin/binary>>};
-        %% 65536
-	Len when Len < 16#10000 ->
+	Len when Len =< 16#FFFF ->
             {ok, <<16#DA:8, Len:16/big-unsigned-integer-unit:1, Bin/binary>>};
 	Len ->
             {ok, <<16#DB:8, Len:32/big-unsigned-integer-unit:1, Bin/binary>>}
@@ -259,8 +258,7 @@ pack_array(L) ->
             case length(L) of
                 Len when Len < 16 ->
                     {ok, <<2#1001:4, Len:4/integer-unit:1, Binary/binary>>};
-                %% 65536
-                Len when Len < 16#10000 -> 
+                Len when Len =< 16#FFFF -> 
                     {ok, <<16#DC:8, Len:16/big-unsigned-integer-unit:1, Binary/binary>>};
                 Len ->
                     {ok, <<16#DD:8, Len:32/big-unsigned-integer-unit:1, Binary/binary>>}
@@ -287,7 +285,7 @@ pack_map(M)->
                 Len when Len < 16 ->
                     {ok, <<2#1000:4, Len:4/integer-unit:1, Binary/binary>>};
                 %% 65536
-                Len when Len < 16#10000 ->
+                Len when Len =< 16#FFFF ->
                     {ok, <<16#DE:8, Len:16/big-unsigned-integer-unit:1, Binary/binary>>};
                 Len ->
                     {ok, <<16#DF:8, Len:32/big-unsigned-integer-unit:1, Binary/binary>>}
