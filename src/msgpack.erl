@@ -153,24 +153,7 @@ unpack_map(Binary, Len, Acc) ->
 
 -spec pack(msgpack_term() | [msgpack_term()]) -> {ok, binary()} | {error, term()}.
 pack(Terms) ->
-    case pack_term(Terms) of
-        {ok, Binary} ->
-            {ok, Binary};
-        {error, _Reason} when is_list(Terms) ->
-            pack(Terms, []);
-        {error, Reason} ->
-            {error, Reason}
-    end.
-
-pack([], Acc) ->
-    {ok, list_to_binary(lists:reverse(Acc))};
-pack([Term|Rest], Acc) ->
-    case pack_term(Term) of
-        {ok, Binary} ->
-            pack(Rest, [Binary|Acc]);
-        {error, Reason} ->
-            {error, Reason}
-    end.
+    pack_term(Terms).
 
 -spec pack_term(msgpack_term()) -> binary() | no_return().
 pack_term(I) when is_integer(I) andalso I < 0 ->
