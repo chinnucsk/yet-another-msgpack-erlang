@@ -1,20 +1,17 @@
 -module(msgpack_proper).
 
--export([positive_fixnum/0,
-         negative_fixnum/0,
-         int8/0,
-         int16/0,
-         int32/0,
-         int64/0,
-         uint8/0,
-         uint16/0,
-         uint32/0,
-         uint64/0,
-         nil/0,
-         raw16/0,
-         raw32/0]).
+-export([choose_type/0]).
 
 -include_lib("proper/include/proper.hrl").
+
+choose_type() ->
+    oneof([positive_fixnum(), negative_fixnum(),
+           int8(), int16(), int32(), int64(),
+           uint8(), uint16(), uint32(), uint64(),
+           nil(), boolean(),
+           fix_raw(), raw16(), raw32(),
+           fix_array(),
+           fix_map()]).
 
 positive_fixnum() ->
     choose(0, 127).
@@ -49,8 +46,33 @@ uint64() ->
 nil() ->
     nil.
 
-%% boolean/0
-%% binary/0 -> binary(choose(0, 31))
+fix_array() ->
+    ?LET(Integer, choose(0, 15),
+         proper_gen:list_gen(Integer, choose_type())).
+
+%% array16() ->
+%%     ?LET(Integer, choose(16, 16#FFFF),
+%%          proper_gen:list_gen(Integer, choose_type())).
+
+%% array32() ->
+%%     ?LET(Integer, choose(16#FFFF, 16#010000),
+%%          proper_gen:list_gen(Integer, choose_type())).
+
+fix_map() ->
+    ?LET(Integer, choose(0, 15),
+         {proper_gen:list_gen(Integer, {choose_type(), choose_type()})}).
+
+%% map16() ->
+%%     ?LET(Integer, choose(16, 16#FFFF),
+%%         proper_gen:list_gen(Integer, {choose_type(), choose_type()})).
+
+%% map32() ->
+%%     ?LET(Integer, choose(16#FFFF, 16#010000),
+%%         proper_gen:list_gen(Integer, {choose_type(), choose_type()})).
+
+fix_raw() ->
+    ?LET(Integer, choose(0, 31),
+        ?LET(Binary, binary(Integer), Binary)).
 
 raw16() ->
     ?LET(Integer, uint16(),
