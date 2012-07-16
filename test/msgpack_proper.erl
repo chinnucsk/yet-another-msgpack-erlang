@@ -2,12 +2,17 @@
 
 -export([choose_type/0]).
 
+-export([array16/0, array32/0,
+         map16/0, map32/0]).
+         
+
 -include_lib("proper/include/proper.hrl").
 
 choose_type() ->
     oneof([positive_fixnum(), negative_fixnum(),
            int8(), int16(), int32(), int64(),
            uint8(), uint16(), uint32(), uint64(),
+           float(),
            nil(), boolean(),
            fix_raw(), raw16(), raw32(),
            fix_array(),
@@ -50,21 +55,21 @@ fix_array() ->
     ?LET(Integer, choose(0, 15),
          proper_gen:list_gen(Integer, choose_type())).
 
-%% array16() ->
-%%      proper_gen:list_gen(16, choose_type()).
+array16() ->
+     proper_gen:list_gen(16, choose_type()).
 
-%% array32() ->
-%%     [ N || N <- lists:seq(0, 16#010000)].
+array32() ->
+    [ N || N <- lists:seq(0, 16#010000)].
 
 fix_map() ->
     ?LET(Integer, choose(0, 15),
          {proper_gen:list_gen(Integer, {choose_type(), choose_type()})}).
 
-%% map16() ->
-%%      proper_gen:list_gen(16, {choose_type(), choose_type()}).
+map16() ->
+     proper_gen:list_gen(16, {choose_type(), choose_type()}).
 
-%% map32() ->
-%%     [{N, N * N} || N <- lists:seq(0, 16#010000)].
+map32() ->
+    [{N, N * N} || N <- lists:seq(0, 16#010000)].
 
 fix_raw() ->
     ?LET(Integer, choose(0, 31),
