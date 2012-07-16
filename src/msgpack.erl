@@ -255,7 +255,7 @@ pack_raw(Bin) ->
 -spec pack_array([msgpack_term()]) -> {ok, binary()} | {error, term()}.
 %% list
 pack_array(L) ->
-    case pack_array_(L, []) of
+    case pack_array_(L, <<>>) of
         {ok, Binary} ->
             case length(L) of
                 Len when Len < 16 ->
@@ -270,18 +270,18 @@ pack_array(L) ->
     end.
 
 pack_array_([], Acc) ->
-    {ok, list_to_binary(lists:reverse(Acc))};
+    {ok, Acc};
 pack_array_([Term|Rest], Acc) ->
     case pack_term(Term) of
         {ok, Binary} ->
-            pack_array_(Rest, [Binary|Acc]);
+            pack_array_(Rest, <<Acc/binary, Binary/binary>>);
         Error ->
             Error
     end.
 
 -spec pack_map(msgpack_map()) -> binary() | no_return().
 pack_map(M)->
-    case pack_map_(M, []) of
+    case pack_map_(M, <<>>) of
         {ok, Binary} ->
             case length(M) of
                 Len when Len < 16 ->
@@ -297,13 +297,13 @@ pack_map(M)->
     end.
 
 pack_map_([], Acc) ->
-    {ok, list_to_binary(lists:reverse(Acc))};
+    {ok, Acc};
 pack_map_([{Key, Value}|Rest], Acc) ->
     case pack_term(Key) of
         {ok, KeyBinary} ->
             case pack_term(Value) of
                 {ok, ValueBinary} ->
-                    pack_map_(Rest, [ValueBinary, KeyBinary|Acc]);
+                    pack_map_(Rest, <<Acc/binary, KeyBinary/binary, ValueBinary/binary>>);
                 Error ->
                     Error
             end;
