@@ -17,6 +17,7 @@ Easy try.
     $ cd msgpack
     $ make
     $ erl -pa ebin
+    Erlang R15B01 (erts-5.9.1) [source] [64-bit] [smp:4:4] [async-threads:0] [kernel-poll:false] [dtrace]
 
     Eshell V5.9.1  (abort with ^G)
     1> {ok, Binary} = msgpack:pack([1,2,3]).
