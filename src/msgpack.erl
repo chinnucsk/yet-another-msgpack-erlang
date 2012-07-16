@@ -6,7 +6,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--type msgpack_map() :: [{msgpack_term(), msgpack_term()}].
+-type msgpack_map() :: {[{msgpack_term(), msgpack_term()}]}.
 -type msgpack_array() :: [msgpack_term()].
 -type msgpack_term() :: msgpack_array() | msgpack_map() | integer() | float() | binary().
 
@@ -137,7 +137,7 @@ unpack_array(Binary, Len, Acc) ->
 
 -spec unpack_map(binary(), non_neg_integer(), msgpack_map()) -> {ok, msgpack_map(), binary()} | {error, term()}.
 unpack_map(Rest, 0, Acc) ->
-    {ok, lists:reverse(Acc), Rest};
+    {ok, {lists:reverse(Acc)}, Rest};
 unpack_map(Binary, Len, Acc) ->
     case unpack_term(Binary) of
         {ok, Key, Rest1} ->
@@ -152,8 +152,6 @@ unpack_map(Binary, Len, Acc) ->
     end.
 
 -spec pack(msgpack_term() | [msgpack_term()]) -> {ok, binary()} | {error, term()}.
-pack(<<>>) ->
-    {error, incomplete};
 pack(Terms) ->
     case pack_term(Terms) of
         {ok, Binary} ->
@@ -189,7 +187,9 @@ pack_term(false) ->
     {ok, <<16#C2:8>>};
 pack_term(Bin) when is_binary(Bin) ->
     pack_raw(Bin);
-pack_term([{_, _}|_] = Map) ->
+pack_term({[] = Map}) ->
+    pack_map(Map);
+pack_term({[{_, _}|_] = Map}) ->
     pack_map(Map);
 pack_term(List) when is_list(List) ->
     pack_array(List);
@@ -361,13 +361,13 @@ map_test_()->
     [
         {"map",
             fun() ->
-                    Map = [ {X, X * 2} || X <- lists:seq(0, 65) ] ++ [{<<"hage">>, 324}, {43542, [nil, true, false]}],
+                    Map = {[ {X, X * 2} || X <- lists:seq(0, 65) ] ++ [{<<"hage">>, 324}, {43542, [nil, true, false]}]},
                     {ok, Binary} = msgpack:pack(Map),
                     ?assertEqual({ok, Map}, msgpack:unpack(Binary))
             end},
         {"empty map is empty list ...",
             fun() ->
-                    EmptyMap = [],
+                    EmptyMap = {[]},
                     {ok, Binary} = msgpack:pack(EmptyMap),
                     ?assertEqual({ok, EmptyMap}, msgpack:unpack(Binary))
             end}
@@ -397,13 +397,22 @@ error_test_()->
             end}
     ].
 
+binary_test_() ->
+    [
+        {"0 byte",
+            fun() ->
+                    {ok, Binary} = pack(<<>>),
+                    ?assertEqual({ok, <<>>}, unpack(Binary))
+            end}
+    ].
+
 long_binary_test_()->
     [
         {"long binary",
             fun() ->
-                    {ok, A} = msgpack:pack(1),
-                    {ok, B} = msgpack:pack(10),
-                    {ok, C} = msgpack:pack(100),
+                    {ok, A} = pack(1),
+                    {ok, B} = pack(10),
+                    {ok, C} = pack(100),
                     ?assertEqual({ok, [1,10,100]},
                                  unpack(list_to_binary([A, B, C])))
             end}
