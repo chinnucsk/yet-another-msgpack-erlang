@@ -47,5 +47,5 @@ Incompatibilities with Original
 - Not use Exception
 - return only {ok, binary() | term()} | {error, term()}
 - Many test
-- Use QC test (ProPer)
+- Add QC test (ProPer)
 - Not implement RPC
