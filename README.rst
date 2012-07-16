@@ -45,7 +45,8 @@ Incompatibilities with Original
 
 - Remove unpack_all/1
 - Not use Exception
-- return only {ok, binary() | term()} | {error, term()}
+- Return only ok/error patten
 - Many test
 - Add QC test (ProPer)
 - Not implement RPC
+- Use a tail-recursive
