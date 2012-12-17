@@ -155,7 +155,7 @@ unpack_map(Binary, Len, Acc) ->
 pack(Terms) ->
     pack_term(Terms).
 
--spec pack_term(msgpack_term()) -> binary() | no_return().
+-spec pack_term(msgpack_term()) -> {ok, <<_:8, _:_*8>>} | {error, {badarg, msgpack_term()}}.
 pack_term(I) when is_integer(I) andalso I < 0 ->
     pack_int(I);
 pack_term(I) when is_integer(I) ->
@@ -180,7 +180,7 @@ pack_term(Term) ->
     {error, {badarg, Term}}.
 
 
--spec pack_uint(non_neg_integer()) -> binary().
+-spec pack_uint(non_neg_integer()) -> {ok, <<_:8,_:_*8>>}.
 %% positive fixnum
 pack_uint(N) when N =< 16#7F ->
     {ok, <<2#0:1, N:7>>};
@@ -197,7 +197,7 @@ pack_uint(N) when N < 16#FFFFFFFF ->
 pack_uint(N) ->
     {ok, <<16#CF:8, N:64/big-unsigned-integer-unit:1>>}.
 
--spec pack_int(integer()) -> binary().
+-spec pack_int(integer()) -> {ok, <<_:8,_:_*8>>}.
 %% negative fixnum
 pack_int(N) when N >= -32 ->
     {ok, <<2#111:3, N:5>>};
@@ -214,7 +214,7 @@ pack_int(N) when N >= -16#80000000 ->
 pack_int(N) ->
     {ok, <<16#D3:8, N:64/big-signed-integer-unit:1>>}.
 
--spec pack_double(float()) -> binary().
+-spec pack_double(float()) -> {ok, <<_:72>>}.
 %% float : erlang's float is always IEEE 754 64bit format.
 %% pack_float(F) when is_float(F)->
 %%    << 16#CA:8, F:32/big-float-unit:1 >>.
@@ -223,7 +223,7 @@ pack_int(N) ->
 pack_double(F) ->
     {ok, <<16#CB:8, F:64/big-float-unit:1>>}.
 
--spec pack_raw(binary()) -> binary().
+-spec pack_raw(binary()) -> {ok, <<_:8, _:_*8>>}.
 %% raw bytes
 pack_raw(Bin) ->
     case byte_size(Bin) of
@@ -235,7 +235,7 @@ pack_raw(Bin) ->
             {ok, <<16#DB:8, Len:32/big-unsigned-integer-unit:1, Bin/binary>>}
     end.
 
--spec pack_array([msgpack_term()]) -> {ok, binary()} | {error, term()}.
+-spec pack_array([msgpack_term()]) -> {ok, binary()} | {error, msgpack_term()}.
 %% list
 pack_array(L) ->
     case pack_array(L, []) of
@@ -248,8 +248,8 @@ pack_array(L) ->
                 Len ->
                     {ok, <<16#DD:8, Len:32/big-unsigned-integer-unit:1, Binary/binary>>}
             end;
-        Error ->
-            Error
+        {error, {badarg, Term}} ->
+            {error, {badarg, Term}}
     end.
 
 pack_array([], Acc) ->
@@ -258,11 +258,11 @@ pack_array([Term|Rest], Acc) ->
     case pack_term(Term) of
         {ok, Binary} ->
             pack_array(Rest, [Binary|Acc]);
-        Error ->
-            Error
+        {error, {badarg, Term}} ->
+            {error, {badarg, Term}}
     end.
 
--spec pack_map(msgpack_map()) -> binary() | no_return().
+-spec pack_map(msgpack_map()) -> {ok, <<_:8, _:_*8>>} | {error, {badarg, term()}}.
 pack_map(M)->
     case pack_map(M, []) of
         {ok, Binary} ->
@@ -275,8 +275,8 @@ pack_map(M)->
                 Len ->
                     {ok, <<16#DF:8, Len:32/big-unsigned-integer-unit:1, Binary/binary>>}
             end;
-        Error ->
-            Error
+        {error, {badarg, Term}} ->
+            {error, {badarg, Term}}
     end.
 
 pack_map([], Acc) ->
@@ -287,11 +287,11 @@ pack_map([{Key, Value}|Rest], Acc) ->
             case pack_term(Value) of
                 {ok, ValueBinary} ->
                     pack_map(Rest, [ValueBinary, KeyBinary|Acc]);
-                Error ->
-                    Error
+                {error, {badarg, Term}} ->
+                    {error, {badarg, Term}}
             end;
-        Error ->
-            Error
+        {error, {badarg, Term}} ->
+            {error, {badarg, Term}}
     end;
 pack_map([Term|_Rest], _Acc) ->
     {error, {badarg, Term}}.
