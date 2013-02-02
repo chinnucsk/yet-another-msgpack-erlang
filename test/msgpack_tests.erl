@@ -107,11 +107,3 @@ long_binary_test_()->
                                  unpack(list_to_binary([A, B, C])))
             end}
     ].
-
-%% benchmark_test()->
-%%     Data = [test_data() || _ <- lists:seq(0, 10000)],
-%%     {ok, S} = ?debugTime("  serialize", pack(Data)),
-%%     {ok, Data} = ?debugTime("deserialize", unpack(S)),
-%%     ?debugFmt("for ~p KB test data.", [byte_size(S) div 1024]),
-%%     ok.
-
