@@ -17,9 +17,9 @@ Easy try.
     $ cd msgpack
     $ make
     $ erl -pa ebin
-    Erlang R15B01 (erts-5.9.1) [source] [64-bit] [smp:4:4] [async-threads:0] [kernel-poll:false] [dtrace]
+    Erlang R16A (erts-5.10) [source] [64-bit] [smp:4:4] [async-threads:10] [kernel-poll:false] [dtrace]
 
-    Eshell V5.9.1  (abort with ^G)
+    Eshell V5.10  (abort with ^G)
     1> Binary = msgpack:pack([1,2,3]).
     <<147,1,2,3>>
     2> [1,2,3] = msgpack:unpack(Binary).
