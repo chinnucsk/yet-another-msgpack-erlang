@@ -45,7 +45,9 @@ Incompatibilities with Original
 
 - Remove unpack_all/1
 - Use Exception
-- Return binary() or msgpack_term()
+- Unpack function return term or exception
+- Pack function return binary
 - Many test
-- Add QC test (ProPer)
+- Add QC test (ProPEr)
 - Use a tail-recursive
+- Support Erlang version R15B later
