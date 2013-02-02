@@ -20,10 +20,10 @@ Easy try.
     Erlang R15B01 (erts-5.9.1) [source] [64-bit] [smp:4:4] [async-threads:0] [kernel-poll:false] [dtrace]
 
     Eshell V5.9.1  (abort with ^G)
-    1> {ok, Binary} = msgpack:pack([1,2,3]).
-    {ok,<<147,1,2,3>>}
-    2> {ok, [1,2,3]} = msgpack:unpack(Binary).
-    {ok,[1,2,3]}
+    1> Binary = msgpack:pack([1,2,3]).
+    <<147,1,2,3>>
+    2> [1,2,3] = msgpack:unpack(Binary).
+    [1,2,3]
 
 
 How to use
@@ -44,9 +44,8 @@ Incompatibilities with Original
 ===============================
 
 - Remove unpack_all/1
-- Not use Exception
-- Return only ok/error patten
+- Use Exception
+- Return binary() or msgpack_term()
 - Many test
 - Add QC test (ProPer)
-- Not implement RPC
 - Use a tail-recursive

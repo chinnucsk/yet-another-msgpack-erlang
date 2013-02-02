@@ -8,8 +8,8 @@ prop_type() ->
     numtests(300,
         ?FORALL(Term, choose_type(),
                 begin
-                    {ok, Binary} = msgpack:pack(Term),
-                    {ok, Term1} = msgpack:unpack(Binary),
+                    Binary = msgpack:pack(Term),
+                    Term1 = msgpack:unpack(Binary),
                     Term =:= Term1
                 end)).
 
@@ -33,6 +33,10 @@ prop_reserved() ->
     numtests(300,
         ?FORALL(Type, choose_reserved(),
                 begin
-                    {error, {badarg, Type1}} = msgpack:unpack(Type),
-                    Type =:= Type1
+                    try
+                        msgpack:unpack(Type)
+                    catch
+                        error:{badarg, Type1} ->
+                            Type =:= Type1
+                    end
                 end)).
