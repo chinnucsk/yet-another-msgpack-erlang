@@ -2,6 +2,8 @@
 
 -export([pack/1, unpack/1]).
 
+-export([stream_pack/1, stream_unpack/1]).
+
 -export([pack_term/1, unpack_term/1]).
 
 -include_lib("eunit/include/eunit.hrl").
@@ -9,6 +11,17 @@
 -type msgpack_map() :: {[{msgpack_term(), msgpack_term()}]}.
 -type msgpack_array() :: [msgpack_term()].
 -type msgpack_term() :: msgpack_array() | msgpack_map() | integer() | float() | binary().
+
+-spec stream_unpack(binary()) -> msgpack_term() | [msgpack_term()].
+stream_unpack(Binary) ->
+    %% XXX: Fix stream
+    unpack(Binary).
+
+-spec stream_pack(msgpack_term() | [msgpack_term()]) -> binary().
+stream_pack(Terms) when is_list(Terms) ->
+    << <<(pack_term(Term))/binary>> || Term <- Terms >>;
+stream_pack(Term) ->
+    pack_term(Term).
 
 -spec unpack(binary()) -> msgpack_term().
 unpack(Binary) when is_binary(Binary) ->

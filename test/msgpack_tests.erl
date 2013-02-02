@@ -1,6 +1,7 @@
 -module(msgpack_tests).
 
--import(msgpack, [pack/1, unpack/1]).
+-import(msgpack, [pack/1, unpack/1,
+                  stream_pack/1, stream_unpack/1]).
 
 -include_lib("eunit/include/eunit.hrl").
 
